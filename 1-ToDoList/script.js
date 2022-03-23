@@ -4,27 +4,29 @@
 ;(function () {
   'use strict'
 
-  // ÀÎÀÚ(target)ÀÇ Äõ¸®¼¿·ºÅÍ¸¦ ¹İÈ¯
+  // ì¸ì(target)ì˜ ì¿¼ë¦¬ì…€ë ‰í„°ë¥¼ ë°˜í™˜
   const get = (target) => {
     return document.querySelector(target)
   }
 
   const $todos = get('.todos');
-  // ÇÒ ÀÏ ÀÔ·ÂÇßÀ»¶§ ¼­¹ö·Î µ¥ÀÌÅÍ ½÷ÁÖµµ·Ï ÇÏ±âÀ§ÇØ formÀÇ DOM °¡Á®¿È
+  // í•  ì¼ ì…ë ¥í–ˆì„ë•Œ ì„œë²„ë¡œ ë°ì´í„° ì´ì£¼ë„ë¡ í•˜ê¸°ìœ„í•´ formì˜ DOM ê°€ì ¸ì˜´
   const $form = get('.todo_form');
   const $todoInput = get('.todo_input');
-
+  const API_URL = `http://localhost:3000/todos`
   const createTodoElement = (item) => {
-    const { id, content } = item
+    const { id, content, completed } = item
     const $todoItem = document.createElement('div')
-    // class¿¡ itemÃß°¡
+    const isChecked = completed ? 'checked' : ''
+    // classì— itemì¶”ê°€
     $todoItem.classList.add('item')
     $todoItem.dataset.id = id
     $todoItem.innerHTML = `
             <div class="content">
               <input
                 type="checkbox"
-                class='todo_checkbox' 
+                class='todo_checkbox'
+                ${isChecked}
               />
               <label>${content}</label>
               <input type="text" value="${content}" />
@@ -47,17 +49,17 @@
             </div>
       `
 
-    // ¸¸µç htmlÀ» ¸®ÅÏ
+    // ë§Œë“  htmlì„ ë¦¬í„´
     return $todoItem
   }
 
   const renderAllTodos = (todos) => {
-    // <div class="todos"></div>¾È¿¡ json¿¡¼­ ºÒ·¯¿Â ³»¿ëµéÀÌ µé¾î°¡¾ßÇÔ
-    // ÃÊ±âÈ­
+    // <div class="todos"></div>ì•ˆì— jsonì—ì„œ ë¶ˆëŸ¬ì˜¨ ë‚´ìš©ë“¤ì´ ë“¤ì–´ê°€ì•¼í•¨
+    // ì´ˆê¸°í™”
     $todos.innerHTML = '';
     
-    // todos°¡ Áö±İ ¹è¿­·Î µé¾î¿À´Âµ¥, ¸®½ºÆ® Çü½ÄÀ¸·Î ÇÏ³ª¾¿ ·»´õ¸µ ÇØÁà¾ßÇÔ
-    // foreach()»ç¿ë
+    // todosê°€ ì§€ê¸ˆ ë°°ì—´ë¡œ ë“¤ì–´ì˜¤ëŠ”ë°, ë¦¬ìŠ¤íŠ¸ í˜•ì‹ìœ¼ë¡œ í•˜ë‚˜ì”© ë Œë”ë§ í•´ì¤˜ì•¼í•¨
+    // foreach()ì‚¬ìš©
     todos.forEach((item) => {
       const todoElement = createTodoElement(item);
       $todos.appendChild(todoElement)
@@ -65,50 +67,65 @@
   }
 
   const getTodos = () => {
-    // fetch('')¾È¿¡ °¡Á®¿Ã json url(json-server)³Ö¾îÁÖ±â
+    // fetch('')ì•ˆì— ê°€ì ¸ì˜¬ json url(json-server)ë„£ì–´ì£¼ê¸°
     fetch('http://localhost:3000/todos')
       .then((response) => response.json())
-      // renderAllTodos() ÇÔ¼ö ÀÛ¼º
-      .then((todos) => renderAllTodos(todos))
-      // ¿¡·¯ ÇÚµé¸µ
-      .catch((error) => console.error(error));
+      // renderAllTodos() í•¨ìˆ˜ ì‘ì„±
+      .then((todos) => {
+        renderAllTodos(todos)
+      })
+      // ì—ëŸ¬ í•¸ë“¤ë§
+      .catch((error) => console.error(error.message));
   }
 
-  // »õ·Î°íÄ§µÊ. AjaxÅë½ÅÇÒ°Çµ¥ »õ·Î°íÄ§ÀÌ ±»ÀÌ ÇÊ¿ä ¾øÀ¸¹Ç·Î preventDefault() Ãß°¡
+  // ìƒˆë¡œê³ ì¹¨ë¨. Ajaxí†µì‹ í• ê±´ë° ìƒˆë¡œê³ ì¹¨ì´ êµ³ì´ í•„ìš” ì—†ìœ¼ë¯€ë¡œ preventDefault() ì¶”ê°€
   const addTodo = (e) => {
-    e.preventDefault();
-    
-    // ¼­¹ö¿¡ ÀúÀåÇÒ todo¿¡´Â content, completed, (id´Â ÀÚµ¿À¸·Î µé¾î°¨)
+    e.preventDefault()
+    const content = $todoInput.value
+    if (!content) return
     const todo = {
-      content: $todoInput.value,
+      content,
       completed: false,
     }
-
-    // $form¿¡¼­ submit ÀÌº¥Æ®°¡ ¹ß»ıÇÒ °æ¿ì, ÀÌº¥Æ®¸®½º³Ê·Î ÀÎÇØ addTodo()È£Ãâ, $todoInput¿¡ ÀÔ·ÂµÈ value°ªÀÌ ÄÜ¼Ö¿¡ ÂïÈû
-    // console.log($todoInput.value);
     fetch('http://localhost:3000/todos', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-type': 'application/json' },
       body: JSON.stringify(todo),
-      // CREATEÇÏ°í ³ª¼­ ´Ù½Ã ÅõµÎ¸®½ºÆ®¸¦ ¹Ş¾Æ¿È
-    }).then(getTodos)
+    })
+      .then((response) => response.json())
+      .then(getTodos)
       .then(() => {
-        // CREATE½Ã Input ÀÔ·ÂÄ­ ºñ¿öÁÖ°í
-        $todoInput.value = '';
-        // focus¸¦ Input ÀÔ·ÂÄ­À¸·Î Àâ¾ÆÁÜ
-        $todoInput.focus();
+        $todoInput.value = ''
+        $todoInput.focus()
       })
+      .catch((error) => console.error(error.message))
+  }
+
+  const toggleTodo = (e) => {
+    // todosì— ì´ë²¤íŠ¸ ë¦¬ìŠ¤ë„ˆê°€ ê±¸ë ¤ìˆìœ¼ë©´ ì•„ë¬´ê³³ì´ë‚˜ í´ë¦­í•´ë„ í•¨ìˆ˜ê°€ í˜¸ì¶œë˜ë‹ˆê¹Œ. ifë¬¸ê³¼ .classNameì„ í†µí•´ ì˜ˆì™¸ì²˜ë¦¬
+    if(e.target.className !== 'todo_checkbox') return
+    // ì²´í¬ë°•ìŠ¤ê°€ ëª‡ë²ˆì§¸ì¸ì§€ë¥¼ ëª¨ë¥´ë‹ˆê¹Œ data-idë²ˆí˜¸ë¡œ íŒë‹¨í•˜ê¸° ìœ„í•´ .itemì„ ê°€ì§„ ì—˜ë¦¬ë¨¼íŠ¸ì˜ data-idë¥¼ ê°€ì ¸ì˜´
+    const $item = e.target.closest('.item')
+    const id = $item.dataset.id;
+    const completed = e.target.checked;
+    console.log(id);
+    fetch(`${API_URL}/${id}`, {
+      method:'PATCH',
+      headers: { 'Content-type': 'application/json' },
+      body: JSON.stringify({completed}),
+    })
+      .then(getTodos)
+      .catch(error => console.error(error))
   }
 
   const init = () => {
-    // ÆÄ½ÌÀÌ ¿Ï·áµÇ¾úÀ» ¶§ getTodos()ÇÔ¼ö È£Ãâ
+    // íŒŒì‹±ì´ ì™„ë£Œë˜ì—ˆì„ ë•Œ getTodos()í•¨ìˆ˜ í˜¸ì¶œ
     window.addEventListener('DOMContentLoaded', () => {
       getTodos();
     })
-    // submit ÀÌº¥Æ®°¡ ¹ß»ıÇÒ °æ¿ì, addTodo()ÇÔ¼ö¸¦ È£Ãâ
+    // submit ì´ë²¤íŠ¸ê°€ ë°œìƒí•  ê²½ìš°, addTodo()í•¨ìˆ˜ë¥¼ í˜¸ì¶œ
     $form.addEventListener('submit', addTodo);
+    $todos.addEventListener('click', toggleTodo)
   }
   init()
 })()
