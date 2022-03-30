@@ -118,6 +118,64 @@
       .catch(error => console.error(error))
   }
 
+  // Todo List 수정기능 추가
+  const changeEditMode = (e) => {
+    // 수정 버튼 눌렀을때 보이거나, 보이지 않아야하는 부분들
+    const $item = e.target.closest('.item');
+    const $label = $item.querySelector('label');
+    const $editInput = $item.querySelector('input[type="text"]');
+    const $contentButtons = $item.querySelector('.content_buttons');
+    const $editButtons = $item.querySelector('.edit_buttons');
+    const value = $editInput.value;
+
+    if (e.target.className === 'todo_edit_button') {
+      // 수정할 내용이 사라지는게 자연스럽기에 해당 display 속성을 변경
+      $label.style.display = 'none';
+      // 수정버튼 클릭 후 입력하는 텍스트는 display block으로
+      $editInput.style.display = 'block';
+      // 수정버튼 클릭 전 표시되던 수정/삭제 버튼이 가려지고 확인 취소 버튼이 떠야하므로
+      $contentButtons.style.display = 'none';
+      $editButtons.style.display = 'block';
+
+      // 수정 버튼 눌렀을때 수정하려는 문구에 focus기능 추가(.focus())
+      $editInput.focus()
+      // 커서가 value 맨 뒤로가야하는데.. 맨 앞으로간다. 일단 $editInput.value를 초기화
+      $editInput.value = ''
+      // 초기화된 $editInput.value에 원래 value값을 다시 넣어준다. 커서가 끝으로 간다.
+      $editInput.value = value;
+    }
+    // x(취소) 버튼 누르면 반대로 동작하게 해야함
+    if (e.target.className === 'todo_edit_cancel_button') {
+      $label.style.display = 'block';
+      $editInput.style.display = 'none';
+      $contentButtons.style.display = 'block';
+      $editButtons.style.display = 'none';
+
+      // 수정중 취소 버튼을 누른 후, 다시 수정 버튼을 누르면 취소했던 수정내용이 다시 뜬다.
+      // value값을 변경해주어야 함
+      $editInput.value = $label.innerText;
+    }
+  }
+
+  const editTodo = (e) => {
+    // className이 일치하지 않을경우 return시킴
+    if (e.target.className !== 'todo_edit_confirm_button') return
+    const $item = e.target.closest('.item');
+    const id = $item.dataset.id;
+    const $editInput = $item.querySelector('input[type="text"]');
+    // 수정값을 넣은 Input의 value를 저장함
+    const content = $editInput.value
+
+    fetch(`${API_URL}/${id}`, {
+      method: 'PATCH',
+      // JSON.stringify() 메서드는 JavaScript 값이나 객체를 JSON 문자열로 변환합니다.
+      headers: { 'Content-type': 'application/json' },
+      body: JSON.stringify({ content }),
+      // then체이닝으로 PATCH한 후 다시 GET해옴
+    }).then(getTodos)
+      .catch((error) => console.error(error))
+  }
+
   const init = () => {
     // 파싱이 완료되었을 때 getTodos()함수 호출
     window.addEventListener('DOMContentLoaded', () => {
@@ -125,7 +183,9 @@
     })
     // submit 이벤트가 발생할 경우, addTodo()함수를 호출
     $form.addEventListener('submit', addTodo);
-    $todos.addEventListener('click', toggleTodo)
+    $todos.addEventListener('click', toggleTodo);
+    $todos.addEventListener('click', changeEditMode);
+    $todos.addEventListener('click', editTodo)
   }
   init()
 })()
