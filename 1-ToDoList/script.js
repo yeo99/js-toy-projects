@@ -176,6 +176,20 @@
       .catch((error) => console.error(error))
   }
 
+  // 함수들 기능이 다 비슷비슷.. TODO: 공통화하여 코드 길이 줄이기
+  const removeTodo = (e) => {
+    if (e.target.className !== 'todo_remove_button') return;
+    const $item = e.target.closest('.item');
+    const id = $item.dataset.id
+
+    fetch(`${API_URL}/${id}`, {
+      // 헤더나 바디는 필요 없음. 데이터를 보내는게 아니기 때문에
+      method: 'DELETE',
+      // getTodos로 다시 받아오고 에러 핸들링
+    }).then(getTodos)
+      .catch((error) => console.error(error));
+  }
+
   const init = () => {
     // 파싱이 완료되었을 때 getTodos()함수 호출
     window.addEventListener('DOMContentLoaded', () => {
@@ -185,7 +199,8 @@
     $form.addEventListener('submit', addTodo);
     $todos.addEventListener('click', toggleTodo);
     $todos.addEventListener('click', changeEditMode);
-    $todos.addEventListener('click', editTodo)
+    $todos.addEventListener('click', editTodo);
+    $todos.addEventListener('click', removeTodo);
   }
   init()
 })()
