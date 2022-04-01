@@ -8,10 +8,69 @@
   const $todos = get('.todos')
   const $form = get('.todo_form')
   const $todoInput = get('.todo_input')
+  const $pagination = get('.pagination');
   const API_URL = `http://localhost:3000/todos`
 
   const limit = 5;  // 한 페이지에 들어갈 최대 개수
-  let currentPage = 1;  // 접속 했을 때 1로 설정 
+  let currentPage = 1;  // 접속 했을 때 1로 설정
+  const totalCount = 53; // 임의값 지정
+  const pageCount = 5;
+
+  const pageinate = () => {
+    let totalPage = Math.ceil(totalCount / limit);
+    let pageGroup = Math.ceil(currentPage / pageCount);
+
+    let lastNumber = pageGroup * pageCount;
+    if (lastNumber > totalPage) {
+      lastNumber = totalPage;
+    }
+
+    let firstNumber = lastNumber - (pageCount - 1);
+    
+    // "다음" 기능
+    const next = lastNumber + 1;
+    // "이전" 기능
+    const prev = firstNumber - 1;
+
+    // 버튼 생성
+    let html = ''
+    if (prev > 0) {
+      html = `<button class="prev" data-fn="prev">이전</button>`
+    }
+
+    // 1~5만큼 페이지네이션 그려줌
+    for (let i=firstNumber; i<=lastNumber; i++ ) {
+      html += `<button class = "pageNumber" id="page_${i}">${i}</button>`
+    }
+    
+    // 다음 버튼 생성
+    if (lastNumber < totalPage) {
+      html += `<button class="next" data-fn="next">다음</button>`
+    }
+
+    // let html 내용을 $pagination에 밀어넣어줌.
+    $pagination.innerHTML = html;
+
+    // 현재 페이지 스타일 변경해서 어딨는지 알려줌
+    const $currentPageNumber = get(`.pageNumber#page_${currentPage}`);
+    $currentPageNumber.style.color = '#9dc0e9';
+
+    const $currentPageNumbers = document.querySelectorAll('.pagination button');
+    $currentPageNumbers.forEach(button => {
+      button.addEventListener('click', () => {
+        if (button.dataset.fn === 'prev') {
+          currentPage = prev;
+
+        } else if (button.dataset.fn === 'next') {
+          currentPage = next;
+        } else {
+          currentPage = button.innerText;
+        }
+        pageinate();
+        getTodos();
+      })
+    })
+  }
 
   const createTodoElement = (item) => {
     const { id, content, completed } = item
@@ -164,6 +223,7 @@
   const init = () => {
     window.addEventListener('DOMContentLoaded', () => {
       getTodos()
+      pageinate();
     })
 
     $form.addEventListener('submit', addTodo)
