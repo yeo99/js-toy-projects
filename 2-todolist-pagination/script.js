@@ -58,7 +58,8 @@
   }
 
   const getTodos = () => {
-    fetch(API_URL)
+    // json-server README의 Paginate부분을 참고하여 작성
+    fetch(`${API_URL}?_page=${currentPage}&_limit=${limit}`)
       .then((response) => response.json())
       .then((todos) => {
         renderAllTodos(todos)
