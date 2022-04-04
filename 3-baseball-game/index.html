@@ -1,33 +1,36 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta 
-        name="viewport"
-        content="width=device-width, initial-scale=1.0 user-scalable=no, viewport-fit=cover">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <title>Baseball</title>
     <link rel="stylesheet" href="./reset.css">
-    <link rel="stylesheet" href="./style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
-    <!-- main태그는 문서에 하나만 -->
+  <body>
     <main>
-        <!-- <h1>Baseball</h1> -->
-        <section>
-            <div class="ball_answer">정답은?</div>
-            <form>
-                <label for="question"></label>
-                <!-- 최소값은 0, 최대값 9999로 지정, input 입력 속성들은 MDN참고 -->
-                <input type="number" id="question" name="question" min="0" max="9999" class="ball_input">
-                <!-- 버튼은 form속성 안에 있을 때, 기본적으로 submit으로 동작함 -->
-                <!-- 이를 원하지 않으면 버튼태그에 type을 button으로 명시해주자 -->
-                <button>도전</button>
-            </form>
-            <div class="ball_question">결과</div>
-        </section>
+      <section>
+        <div class="ball_answer">정답은?</div>
+        <form>
+          <label for="question"></label>
+          <input
+            type="number"
+            id="question"
+            name="question"
+            min="0"
+            max="9999"
+            size="4"
+            class="ball_input"
+          />
+          <button>도전</button>
+        </form>
+        <div class="ball_question">결과</div>
+      </section>
     </main>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
